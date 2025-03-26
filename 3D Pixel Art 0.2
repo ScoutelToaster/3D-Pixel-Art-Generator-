@@ -1,0 +1,97 @@
+pip install Pillow
+
+import turtle
+from PIL import Image
+
+# Set up the screen
+screen = turtle.Screen()
+screen.bgcolor("white")
+screen.setup(width=800, height=600)
+
+# Create the turtle
+pix_turtle = turtle.Turtle()
+pix_turtle.shape("turtle")
+pix_turtle.speed(0)  # Fastest drawing speed
+
+def draw_pixel(color, size=20):
+    """
+    Draw a single 'pixel' (square) using the turtle.
+    :param color: The color of the pixel
+    :param size: The size of the pixel
+    """
+    pix_turtle.fillcolor(color)
+    pix_turtle.begin_fill()
+    
+    for _ in range(4):
+        pix_turtle.forward(size)
+        pix_turtle.right(90)
+    
+    pix_turtle.end_fill()
+
+def process_image(image_path, pixel_size=20):
+    """
+    Process the image to create a pixelated effect.
+    :param image_path: Path to the image file.
+    :param pixel_size: The size of each pixel (square).
+    """
+    # Open the image and resize it to create pixel art
+    img = Image.open(image_path)
+    img = img.resize((img.width // pixel_size, img.height // pixel_size), Image.NEAREST)
+
+    # Convert the image to RGB (in case it's in a different mode)
+    img = img.convert("RGB")
+    
+    return img
+
+def render_pixel_art(image_path, pixel_size=20):
+    """
+    Render the image as pixel art using turtle.
+    :param image_path: Path to the image file.
+    :param pixel_size: The size of each pixel (square).
+    """
+    img = process_image(image_path, pixel_size)
+
+    # Get image width and height
+    width, height = img.size
+
+    # Set the initial position for drawing
+    pix_turtle.penup()
+    pix_turtle.goto(-width * pixel_size // 2, height * pixel_size // 2)
+    pix_turtle.pendown()
+
+    # Draw the image pixel by pixel
+    for y in range(height):
+        for x in range(width):
+            # Get the pixel color
+            r, g, b = img.getpixel((x, y))
+            color = (r, g, b)  # Color in RGB
+            
+            # Convert RGB to a format turtle can understand
+            color_str = f"#{r:02x}{g:02x}{b:02x}"
+
+            # Draw the pixel (square)
+            draw_pixel(color_str, pixel_size)
+            
+            # Move to the next position
+            pix_turtle.penup()
+            pix_turtle.forward(pixel_size)
+            pix_turtle.pendown()
+
+        # Move to the next row
+        pix_turtle.penup()
+        pix_turtle.goto(-width * pixel_size // 2, height * pixel_size // 2 - (y + 1) * pixel_size)
+        pix_turtle.pendown()
+
+def main():
+    # Load an image and render it as pixel art
+    image_path = "your_image_path_here.png"  # Change to your image path
+    render_pixel_art(image_path, pixel_size=15)  # You can change the pixel size here
+
+    # Hide the turtle after drawing
+    pix_turtle.hideturtle()
+
+    # Keep the window open
+    screen.mainloop()
+
+# Run the main function
+main()
