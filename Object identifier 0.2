@@ -1,0 +1,113 @@
+pip install tensorflow opencv-python
+
+import tensorflow as tf
+import numpy as np
+import cv2
+
+# Load the pre-trained model from TensorFlow Hub
+model = tf.saved_model.load("ssd_mobilenet_v2_coco/saved_model")
+
+# Load the class labels (COCO dataset labels)
+LABELS = {
+    1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorbike', 5: 'airplane', 
+    6: 'bus', 7: 'train', 8: 'truck', 9: 'boat', 10: 'traffic light', 
+    11: 'fire hydrant', 13: 'dog', 14: 'horse', 15: 'sheep', 16: 'cow', 
+    17: 'elephant', 18: 'bear', 19: 'zebra', 20: 'giraffe', 21: 'backpack', 
+    22: 'umbrella', 23: 'handbag', 24: 'tie', 25: 'suitcase', 27: 'frisbee', 
+    28: 'skis', 29: 'snowboard', 30: 'sports ball', 31: 'kite', 32: 'baseball bat', 
+    33: 'baseball glove', 34: 'skateboard', 35: 'surfboard', 36: 'tennis racket', 
+    37: 'bottle', 38: 'wine glass', 39: 'cup', 40: 'fork', 41: 'knife', 
+    42: 'spoon', 43: 'bowl', 44: 'banana', 45: 'apple', 46: 'sandwich', 
+    47: 'orange', 48: 'broccoli', 49: 'carrot', 50: 'hot dog', 51: 'pizza', 
+    52: 'donut', 53: 'cake', 54: 'chair', 55: 'couch', 56: 'potted plant', 
+    57: 'bed', 58: 'dining table', 59: 'toilet', 60: 'tv', 61: 'laptop', 
+    62: 'mouse', 63: 'remote', 64: 'keyboard', 65: 'cell phone', 67: 'microwave', 
+    68: 'oven', 69: 'toaster', 70: 'sink', 71: 'refrigerator', 72: 'book', 
+    73: 'clock', 74: 'vase', 75: 'scissors', 76: 'teddy bear', 77: 'hair drier', 
+    78: 'toothbrush', 79: 'scarf', 80: 'fridge'
+}
+
+def load_image(image_path):
+    """
+    Load an image from file and prepare it for detection.
+    :param image_path: Path to the image file.
+    :return: The loaded image in numpy array format.
+    """
+    image = cv2.imread(image_path)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return image, image_rgb
+
+def run_inference_for_single_image(model, image):
+    """
+    Run the object detection model on the input image.
+    :param model: Pre-trained object detection model.
+    :param image: Image in numpy array format.
+    :return: Inference results.
+    """
+    # Convert image to tensor
+    input_tensor = tf.convert_to_tensor(image)
+    input_tensor = input_tensor[tf.newaxis,...]
+    
+    # Run inference
+    detections = model(input_tensor)
+
+    # Process output (bounding boxes, class labels, and scores)
+    return detections
+
+def visualize_results(image, detections):
+    """
+    Visualize the results on the image by drawing bounding boxes.
+    :param image: The image to draw on.
+    :param detections: Detections returned by the model.
+    """
+    boxes = detections['detection_boxes'][0].numpy()
+    class_ids = detections['detection_classes'][0].numpy().astype(np.int32)
+    scores = detections['detection_scores'][0].numpy()
+
+    # Define a threshold for object detection confidence
+    detection_threshold = 0.5
+
+    for i in range(len(boxes)):
+        if scores[i] > detection_threshold:
+            box = boxes[i]
+            y1, x1, y2, x2 = box
+            (left, right, top, bottom) = (x1 * image.shape[1], x2 * image.shape[1], y1 * image.shape[0], y2 * image.shape[0])
+            class_id = class_ids[i]
+            label = LABELS.get(class_id, "Unknown")
+            
+            # Draw bounding box
+            cv2.rectangle(image, (int(left), int(top)), (int(right), int(bottom)), (255, 0, 0), 2)
+            cv2.putText(image, f'{label}: {scores[i]:.2f}', (int(left), int(top) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+    # Convert the image back to BGR for OpenCV to display it
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    cv2.imshow("Object Detection", image_bgr)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def main():
+    image_path = 'your_image_path_here.jpg'  # Replace with your image path
+
+    # Load image
+    image, image_rgb = load_image(image_path)
+
+    # Run inference
+    detections = run_inference_for_single_image(model, image_rgb)
+
+    # Visualize results
+    visualize_results(image, detections)
+
+    # List detected objects
+    detected_objects = set()
+    class_ids = detections['detection_classes'][0].numpy().astype(np.int32)
+    scores = detections['detection_scores'][0].numpy()
+    for i in range(len(class_ids)):
+        if scores[i] > 0.5:  # Confidence threshold
+            detected_objects.add(LABELS.get(class_ids[i], "Unknown"))
+    
+    print("Detected objects:")
+    for obj in detected_objects:
+        print(obj)
+
+if __name__ == "__main__":
+    main()
