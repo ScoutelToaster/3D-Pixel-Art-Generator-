@@ -1,0 +1,108 @@
+import turtle
+
+# Set up the screen
+screen = turtle.Screen()
+screen.bgcolor("white")
+
+# Create the turtle
+pix_turtle = turtle.Turtle()
+pix_turtle.shape("turtle")
+pix_turtle.speed(0)  # Fastest drawing speed
+
+def draw_3d_cube(size=100):
+    """
+    Draw a simple 3D cube using turtle graphics by simulating perspective.
+    """
+    # Set the initial position of the turtle
+    pix_turtle.penup()
+    pix_turtle.goto(-size // 2, size // 2)  # Move to top-left corner
+    pix_turtle.pendown()
+
+    # Define the cube's "front" and "back" corners
+    front_top_left = (-size // 2, size // 2)
+    front_top_right = (size // 2, size // 2)
+    front_bottom_left = (-size // 2, -size // 2)
+    front_bottom_right = (size // 2, -size // 2)
+
+    back_top_left = (-size // 2 + 30, size // 2 - 30)
+    back_top_right = (size // 2 + 30, size // 2 - 30)
+    back_bottom_left = (-size // 2 + 30, -size // 2 - 30)
+    back_bottom_right = (size // 2 + 30, -size // 2 - 30)
+
+    # Drawing the "front" face of the cube
+    pix_turtle.penup()
+    pix_turtle.goto(*front_top_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*front_top_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_top_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*front_bottom_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_bottom_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*front_bottom_left)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_bottom_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*front_top_left)
+
+    # Drawing the "back" face of the cube
+    pix_turtle.penup()
+    pix_turtle.goto(*back_top_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_top_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*back_top_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_bottom_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*back_bottom_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_bottom_left)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*back_bottom_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_top_left)
+
+    # Connecting front and back faces to form the 3D cube
+    pix_turtle.penup()
+    pix_turtle.goto(*front_top_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_top_left)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_top_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_top_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_bottom_right)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_bottom_right)
+
+    pix_turtle.penup()
+    pix_turtle.goto(*front_bottom_left)
+    pix_turtle.pendown()
+    pix_turtle.goto(*back_bottom_left)
+
+def simulate_3d_objects():
+    """
+    Simulate 3D objects (like cubes) on a 2D screen using perspective.
+    """
+    draw_3d_cube(size=150)
+
+# Test the 3D simulation
+simulate_3d_objects()
+
+# Hide the turtle after drawing
+pix_turtle.hideturtle()
+
+# Keep the window open
+screen.mainloop()
